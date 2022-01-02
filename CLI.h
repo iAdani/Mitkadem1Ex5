@@ -11,6 +11,7 @@ using namespace std;
 class CLI {
 	DefaultIO* dio;
 	vector<Command*> commands;
+    vector<AnomalyReport> *report;
     bool isRunning = true;
 	HybridAnomalyDetector detector;
 

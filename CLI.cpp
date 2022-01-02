@@ -1,13 +1,13 @@
 #include "CLI.h"
 
 CLI::CLI(DefaultIO* dio): dio(dio), detector() {
-    vector<AnomalyReport> report; // "shared" by commands 3 and 4
+    report = new vector<AnomalyReport>(); // "shared" by commands 3 and 4
     
     // make the commands vector
     commands.push_back(new Command1(dio));
     commands.push_back(new Command2(dio));
-    commands.push_back(new Command3(dio, &report));
-    commands.push_back(new Command4(dio, &report));
+    commands.push_back(new Command3(dio, report));
+    commands.push_back(new Command4(dio, report));
     commands.push_back(new Command5(dio));
     commands.push_back(new Command6(dio));
 
@@ -36,6 +36,7 @@ CLI::~CLI() {
     for(auto c = commands.begin(); c != commands.end(); c++) {
         delete *c;
     }
+    delete this->report;
 }
 
 void CLI::exit() {
