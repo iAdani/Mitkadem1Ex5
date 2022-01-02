@@ -2,7 +2,7 @@
  * run2.cpp
  *
  *  Created on: 8 ����� 2019
- *      Author: Eli
+ *      Author: Eli khalacheski
  */
 
 #include <iostream>
