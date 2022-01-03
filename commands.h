@@ -51,7 +51,7 @@ class StandardIO  : public DefaultIO{
 class Command{
 	DefaultIO* dio;
     string description;
-    HybridAnomalyDetector *detector;
+
 public:
 	Command(DefaultIO* dio, string des):dio(dio){
         description = des;
@@ -64,12 +64,6 @@ public:
 
     // returns the command's IO
     DefaultIO* getIO() { return dio; }
-
-    // sets a detector
-    void setDetector(HybridAnomalyDetector *det){ detector = det; }
-
-    // returns the detector
-    HybridAnomalyDetector* getDetector() { return detector; }
 };
 
 //     ~ Command Classes ~
@@ -111,18 +105,20 @@ public:
 
 // For command 2: used to set algorithm settings
 class Command2 : public Command{
+    HybridAnomalyDetector *detector;
 
     // check if the float is between 0 and 1
     bool checkThres(float t) {
         return (1 >= t && 0 <= t);
     }
 public:
-    Command2(DefaultIO* dio) : Command(dio,  "algorithm settings"){}
+    Command2(DefaultIO* dio, HybridAnomalyDetector* det) : Command(dio,  "algorithm settings"){
+        detector = det;
+    }
 
     // show the current threshold and changes it
     virtual void execute(){
         DefaultIO* io = getIO();
-        HybridAnomalyDetector* detector = getDetector();
 
         // show the threshold
         io->write("The current correlation threshold is ");
@@ -144,17 +140,18 @@ public:
 
 // For command 3: used to detect anomalies
 class Command3 : public Command{
-    vector<AnomalyReport> *report; // "shared" with command4
+    vector<AnomalyReport> *report; // "shared" by commands 3,4,5
+    HybridAnomalyDetector *detector;
 
 public:
-    Command3(DefaultIO* dio, vector<AnomalyReport>* rep) :
-                             Command(dio,  "detect anomalies"){
+    Command3(DefaultIO* dio, vector<AnomalyReport>* rep, HybridAnomalyDetector *det) :
+                                                        Command(dio,  "detect anomalies") {
     report = rep;
+    detector = det;
     }
 
     // run the Hybrid detector on the csv files
     virtual void execute(){
-        HybridAnomalyDetector *detector = getDetector();
         DefaultIO *io = getIO();
 
         // run learnNormal for train input
@@ -177,7 +174,7 @@ public:
 
 // For command 4: used to display results
 class Command4 : public Command{
-    vector<AnomalyReport> *report; // "shared" with command3
+    vector<AnomalyReport> *report; // "shared" by commands 3,4,5
 
 public:
     Command4(DefaultIO* dio, vector<AnomalyReport>* rep)
@@ -190,7 +187,6 @@ public:
         string line = "";
 
         // writing the report
-        cout << report << endl;
         for (auto c = report->begin(); c != report->end(); c++) {
             io->write(c->timeStep);
             io->write("\t" + c->description + "\n");
@@ -201,21 +197,56 @@ public:
 
 // For command 5: used to upload anomalies and analyze results
 class Command5 : public Command{
+    vector<AnomalyReport> *report; // "shared" by commands 3,4,5
+    HybridAnomalyDetector* detector;
+
 public:
-    Command5(DefaultIO* dio) : Command(dio,  "upload anomalies and analyze results"){}
-
-    virtual void execute(){}
-};
-
-// For command 6: used to exit
-class Command6 : public Command{
-public:
-    Command6(DefaultIO* dio) : Command(dio,  "exit"){}
-
-    virtual void execute(){
-
+    Command5(DefaultIO* dio, vector<AnomalyReport> *rep, HybridAnomalyDetector* det)
+                                        : Command(dio,  "upload anomalies and analyze results"){
+        report = rep;
+        detector = det;
     }
-};
 
+    // to check the reports in a row, the algorithm uses 2 vectors;
+    // 1st for different descriptions (features) and 2nd for their length.
+    virtual void execute(){
+        DefaultIO* io = getIO();
+
+        // preparing the vectors
+        vector<AnomalyReport> difReports;
+        vector<int> lengths;
+        int repCount = 0;
+        string lastDescription = "";
+        for (auto c = report->begin(); c != report->end(); c++) {
+            if (lastDescription.compare(c->description) == 0) {         // if there's a streak
+                lengths.back()++;
+            } else {
+                difReports.push_back(*c);
+                lengths.push_back(0);
+                lastDescription = c->description;
+            }
+        }
+
+        // reading the input file. splits the values to 2 vectors of first and last values
+        io->write("Please upload your local anomalies file.");
+        vector<int> firsts;                             // the first detections from the file
+        vector<int> lasts;                              // the last detections from the file
+        int commaPos = 0;                               // used to find the comma position in the input
+        string input = io->read();
+        while (input.compare("done") != 0) {
+            commaPos = input.find(',');
+            firsts.push_back(stoi(input.substr(0, commaPos)));
+            lasts.push_back(stoi(input.substr(commaPos + 1)));
+            input = io->read();
+        }
+        io->write("Upload complete.");
+
+        // analyzing the detection. names are as described in the instructions
+        float P = firsts.size();
+        int n;
+        float N;
+    }
+
+};
 
 #endif /* COMMANDS_H_ */

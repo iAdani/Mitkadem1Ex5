@@ -17,13 +17,12 @@ bool TimeSeries::fileExists(const char* name) {
 
 // imports the CSV file
 void TimeSeries::importCSV() {
-    ifstream stream(this->_fileName);           // stream the file
+    ifstream stream(this->_fileName);        // stream the file
     vector<string> columnNames;                 // the column names (map keys)
     string line;                                // current line reading
-    float cell;                                 // current cell reading
     int numOfColumns;
 
-    getline(stream, line, '\n');                // get the first line into 'line'
+    getline(stream, line, '\n');   // get the first line into 'line'
     line += ",";
     int begin = 0;                              // the begin of each column name
     for (int end = 0; end < line.length(); end++) {   // get the column names to columnNames

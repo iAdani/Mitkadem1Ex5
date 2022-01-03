@@ -5,15 +5,10 @@ CLI::CLI(DefaultIO* dio): dio(dio), detector() {
     
     // make the commands vector
     commands.push_back(new Command1(dio));
-    commands.push_back(new Command2(dio));
-    commands.push_back(new Command3(dio, report));
+    commands.push_back(new Command2(dio, &detector));
+    commands.push_back(new Command3(dio, report, &detector));
     commands.push_back(new Command4(dio, report));
-    commands.push_back(new Command5(dio));
-    commands.push_back(new Command6(dio));
-
-    // set the detector for the relevant commands
-    commands[1]->setDetector(&detector);
-    commands[2]->setDetector(&detector);
+    commands.push_back(new Command5(dio, report, &detector));
 }
 
 void CLI::start(){
@@ -23,7 +18,7 @@ void CLI::start(){
     while (isRunning) {
         dio->write(menu);
         option = dio->read();
-        if (option.compare("5") == 0) {
+        if (option.compare("6") == 0) {
             exit();
         } else {
             commands[stoi(option) - 1]->execute();
