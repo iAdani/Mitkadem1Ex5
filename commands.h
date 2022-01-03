@@ -168,7 +168,6 @@ public:
         }
 
         io->write("anomaly detection complete.\n");
-
     }
 };
 
@@ -228,23 +227,46 @@ public:
         }
 
         // reading the input file. splits the values to 2 vectors of first and last values
-        io->write("Please upload your local anomalies file.");
-        vector<int> firsts;                             // the first detections from the file
-        vector<int> lasts;                              // the last detections from the file
+        io->write("Please upload your local anomalies file.\n");
+        vector<int> begins;                             // the first detections from the file
+        vector<int> ends;                              // the last detections from the file
         int commaPos = 0;                               // used to find the comma position in the input
         string input = io->read();
         while (input.compare("done") != 0) {
             commaPos = input.find(',');
-            firsts.push_back(stoi(input.substr(0, commaPos)));
-            lasts.push_back(stoi(input.substr(commaPos + 1)));
+            begins.push_back(stoi(input.substr(0, commaPos)));
+            ends.push_back(stoi(input.substr(commaPos + 1)));
             input = io->read();
         }
-        io->write("Upload complete.");
+        io->write("Upload complete.\n");
 
         // analyzing the detection. names are as described in the instructions
-        float P = firsts.size();
-        int n;
-        float N;
+        float P = begins.size();                        // P
+
+        TimeSeries ts("anomalyTest.csv");
+        int n = ts.getRowNum();
+        int detectsSum = 0;
+        for (int i = 0; i < P; i++) {
+            detectsSum += (ends[i] - begins[i] + 1);
+        }
+        float N = n - detectsSum;                       // N
+
+        float TP = 0;                                   // TP
+        int reportsNum = difReports.size();
+        int rb, re;                                         // begin and end for the reports
+        for (int i = 0; i < P; i++) {                   // for each "Hariga"
+            for (int j = 0; j < reportsNum; j++) {      // look for a parallel report
+                rb = difReports[j].timeStep;
+                re = rb + lengths[j];
+                if (ends[i] >= rb && re >= begins[i]) { // found TP
+                    TP++;
+                    break;
+                }
+            }
+        }
+
+        float FP = 0;                                   // FP
+
     }
 
 };
