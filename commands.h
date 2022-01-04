@@ -190,7 +190,7 @@ public:
             io->write(c->timeStep);
             io->write("\t" + c->description + "\n");
         }
-        io->write("Done.");
+        io->write("Done.\n");
     }
 };
 
@@ -265,10 +265,16 @@ public:
             }
         }
 
-        float FP = 0;                                   // FP
+        float FP = reportsNum - TP;                     // FP
 
+        // writing
+
+        io->write("True Positive Rate: ");
+        io->write((int)(1000.0 * TP / P) / 1000.0f);
+        io->write("\nFalse Positive Rate: ");
+        io->write((int)(1000.0 * FP / N) / 1000.0f);
+        io->write("\n");
     }
-
 };
 
 #endif /* COMMANDS_H_ */
