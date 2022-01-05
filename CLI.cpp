@@ -1,3 +1,5 @@
+// Author: Guy Adani 208642884
+
 #include "CLI.h"
 
 CLI::CLI(DefaultIO* dio): dio(dio), detector() {
