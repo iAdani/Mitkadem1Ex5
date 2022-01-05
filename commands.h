@@ -153,6 +153,7 @@ public:
     // run the Hybrid detector on the csv files
     virtual void execute(){
         DefaultIO *io = getIO();
+        report->clear();
 
         // run learnNormal for train input
         TimeSeries trainTs("anomalyTrain.csv");
@@ -190,6 +191,7 @@ public:
             io->write(c->timeStep);
             io->write("\t" + c->description + "\n");
         }
+
         io->write("Done.\n");
     }
 };
@@ -268,12 +270,17 @@ public:
         float FP = reportsNum - TP;                     // FP
 
         // writing
-
         io->write("True Positive Rate: ");
         io->write((int)(1000.0 * TP / P) / 1000.0f);
         io->write("\nFalse Positive Rate: ");
         io->write((int)(1000.0 * FP / N) / 1000.0f);
         io->write("\n");
+
+//        // cleaning for next time
+//        difReports.clear();
+//        lengths.clear();
+//        begins.clear();
+//        ends.clear();
     }
 };
 

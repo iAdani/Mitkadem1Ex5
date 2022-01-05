@@ -10,6 +10,7 @@ SimpleAnomalyDetector::~SimpleAnomalyDetector() { }
 
 // returns correlated features
 void SimpleAnomalyDetector::learnNormal(const TimeSeries& ts){
+    cf.clear();
 	map<string, vector<float>> tMap = ts.getMap();
 	const vector<string> columns = ts.getColumnNames();
 
